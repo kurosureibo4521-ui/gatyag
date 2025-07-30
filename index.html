@@ -137,7 +137,6 @@
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-center text-indigo-800 mb-6">ガチャシミュレーター</h1>
         
-        <!-- 通知エリア -->
         <div id="notification" class="fixed top-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-md max-w-md z-50 hidden notification">
             <div class="flex">
                 <div class="py-1">
@@ -152,7 +151,6 @@
             </div>
         </div>
         
-        <!-- エラー通知エリア -->
         <div id="error-notification" class="fixed top-4 right-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md max-w-md z-50 hidden notification error-message">
             <div class="flex">
                 <div class="py-1">
@@ -167,7 +165,6 @@
             </div>
         </div>
         
-        <!-- 編集モーダル -->
         <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden edit-modal">
             <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
                 <div class="flex justify-between items-center mb-4">
@@ -210,7 +207,6 @@
             </div>
         </div>
         
-        <!-- 設定モーダル -->
         <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden edit-modal">
             <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
                 <div class="flex justify-between items-center mb-4">
@@ -235,7 +231,6 @@
             </div>
         </div>
         
-        <!-- シェアモーダル -->
         <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden edit-modal">
             <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
                 <div class="flex justify-between items-center mb-4">
@@ -264,20 +259,18 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- 左カラム: ガチャ実行エリア -->
             <div class="md:col-span-2">
                 <div class="gacha-container p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-white">ガチャを回す</h2>
                         <button id="open-settings" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
                             </svg>
                         </button>
                     </div>
                     
                     <div class="bg-white bg-opacity-90 rounded-lg p-4 mb-4">
-                        <!-- 対象者の入力欄を追加 -->
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-gray-700">対象者:</span>
                             <div class="w-3/4 relative">
@@ -327,7 +320,6 @@
                 </div>
             </div>
             
-            <!-- 右カラム: 景品設定エリア -->
             <div>
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                     <h2 class="text-xl font-bold text-indigo-800 mb-4">景品設定</h2>
@@ -376,12 +368,20 @@
                         <span class="rarity-badge bg-pink-200 text-pink-800">UR</span>
                         <span class="rarity-badge bg-yellow-200 text-yellow-800 ultimate-text">LR</span>
                     </div>
+
+                    <div class="mb-4">
+                        <label for="sort-order" class="block text-gray-700 mb-2">表示順:</label>
+                        <select id="sort-order" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                            <option value="registration-newest">登録順 (新しいものが上)</option>
+                            <option value="registration-oldest">登録順 (古いものが上)</option>
+                            <option value="rarity">レア度順</option>
+                        </select>
+                    </div>
                     
                     <div id="prize-list" class="space-y-2 max-h-60 overflow-y-auto">
                         <p class="text-gray-500 text-center py-4">景品はまだ登録されていません</p>
                     </div>
                     
-                    <!-- 確率調整ボタン -->
                     <div id="adjust-probability-container" class="mt-4 hidden">
                         <button id="adjust-probability" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md">
                             確率を自動調整 (合計100%に)
@@ -434,6 +434,7 @@
             const shareToXButton = document.getElementById('share-to-x');
             const targetPersonInput = document.getElementById('target-person');
             const targetError = document.getElementById('target-error');
+            const sortOrderSelect = document.getElementById('sort-order'); // 新しいソート選択UI
             
             // データ
             let prizes = [];
@@ -441,7 +442,8 @@
             let pointPerDraw = 100; // デフォルト値
             let currentResults = null; // 現在の結果を保存
             let targetPerson = ""; // 対象者
-            
+            let currentSortOrder = 'registration-newest'; // デフォルトのソート順 (新しいものを上)
+
             // レア度ごとのデフォルト確率と色
             const raritySettings = {
                 'common': { defaultProb: 59, bgColor: 'bg-gray-200', textColor: 'text-gray-800', label: 'N' },
@@ -570,7 +572,7 @@
                     .map(([name, data]) => `${name}(${data.count})`);
                 
                 // シェアメッセージを構築
- 　　　　　　　   let message = `【ガチャシミュレーター】${results.length}回引いた結果\n#なるみんTOOL\n`;
+                let message = `【ガチャシミュレーター】${results.length}回引いた結果\n#なるみんTOOL\n`;
                 
                 // 対象者を追加
                 if (targetPerson) {
@@ -606,7 +608,7 @@
                 return prize ? prize.probability : undefined;
             }
             
-            // 確率を自動調整する関数
+            // 確率を自動調整する関数 (全景品対象)
             function autoAdjustProbability() {
                 if (prizes.length === 0) return;
                 
@@ -633,39 +635,66 @@
                 // ローカルストレージに保存
                 saveToLocalStorage();
             }
+
+            // 特定のレア度の景品確率を均等に再配分する関数
+            function rebalanceRarityProbabilities(rarityToRebalance) {
+                const prizesOfRarity = prizes.filter(prize => prize.rarity === rarityToRebalance);
+                if (prizesOfRarity.length === 0) {
+                    // そのレア度の景品がない場合は何もしない
+                    return;
+                }
+
+                // そのレア度のデフォルト確率を取得
+                const defaultRarityProb = raritySettings[rarityToRebalance].defaultProb;
+
+                // 各景品に均等に割り振る
+                const newProbPerPrize = defaultRarityProb / prizesOfRarity.length;
+
+                prizesOfRarity.forEach(prize => {
+                    prize.probability = Math.round(newProbPerPrize * 10) / 10; // 小数点第1位まで丸める
+                });
+                
+                // 合計がデフォルト確率になるように最後の景品を微調整
+                const currentSum = prizesOfRarity.reduce((sum, prize, index) => {
+                    if (index < prizesOfRarity.length - 1) {
+                        return sum + prize.probability;
+                    }
+                    return sum;
+                }, 0);
+
+                if (prizesOfRarity.length > 0) {
+                    prizesOfRarity[prizesOfRazes.length - 1].probability = Math.round((defaultRarityProb - currentSum) * 10) / 10;
+                }
+
+                updatePrizeList();
+                saveToLocalStorage();
+            }
             
             // 景品を追加
             addPrizeButton.addEventListener('click', function() {
                 const name = prizeNameInput.value.trim();
                 const rarity = raritySelect.value;
-                const probability = parseFloat(probabilityInput.value);
-                
+                const probability = parseFloat(probabilityInput.value); // この確率はここでは使わないが、入力値として受け取る
+
                 if (!name) {
                     alert('景品名を入力してください');
                     return;
                 }
                 
-                if (isNaN(probability) || probability <= 0 || probability > 100) {
-                    alert('確率は0より大きく100以下の数値を入力してください');
-                    return;
-                }
-                
-                // 景品を追加
+                // 景品を追加（確率は後でrebalanceRarityProbabilitiesで設定される）
                 prizes.push({
                     name,
                     rarity,
-                    probability
+                    probability: 0, // 初期確率は0にして、後で再調整
+                    registrationOrder: Date.now() // 登録順を保存 (タイムスタンプでユニークな順序を保証)
                 });
                 
                 // 入力フィールドをリセット
                 prizeNameInput.value = '';
-                probabilityInput.value = raritySettings[raritySelect.value].defaultProb;
+                probabilityInput.value = raritySettings[raritySelect.value].defaultProb; // デフォルト確率に戻す
                 
-                // 景品リストを更新
-                updatePrizeList();
-                
-                // 自動で確率を調整
-                autoAdjustProbability();
+                // 同じレア度の景品を再調整
+                rebalanceRarityProbabilities(rarity);
                 
                 // 通知を表示
                 showNotification('景品を追加しました');
@@ -679,7 +708,23 @@
                 } else {
                     prizeList.innerHTML = '';
                     
-                    prizes.forEach((prize, index) => {
+                    // ソート処理
+                    let sortedPrizes = [...prizes]; // 元の配列を破壊しないようにコピー
+                    if (currentSortOrder === 'rarity') {
+                        sortedPrizes.sort((a, b) => {
+                            // レア度が高いものほど前になるようにソート
+                            return rarityPriority.indexOf(a.rarity) - rarityPriority.indexOf(b.rarity);
+                        });
+                    } else if (currentSortOrder === 'registration-newest') {
+                        // 登録順 (新しいものが上)
+                        sortedPrizes.sort((a, b) => b.registrationOrder - a.registrationOrder);
+                    } else if (currentSortOrder === 'registration-oldest') {
+                        // 登録順 (古いものが上)
+                        sortedPrizes.sort((a, b) => a.registrationOrder - b.registrationOrder);
+                    }
+
+
+                    sortedPrizes.forEach((prize, index) => {
                         const rarityStyle = raritySettings[prize.rarity];
                         
                         const prizeElement = document.createElement('div');
@@ -703,12 +748,12 @@
                                 <div class="text-xs">${rarityStyle.label} • ${prize.probability}%</div>
                             </div>
                             <div class="flex space-x-1">
-                                <button class="edit-prize text-indigo-500 hover:text-indigo-700" data-index="${index}">
+                                <button class="edit-prize text-indigo-500 hover:text-indigo-700" data-original-index="${prizes.indexOf(prize)}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                     </svg>
                                 </button>
-                                <button class="delete-prize text-red-500 hover:text-red-700" data-index="${index}">
+                                <button class="delete-prize text-red-500 hover:text-red-700" data-original-index="${prizes.indexOf(prize)}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                     </svg>
@@ -722,17 +767,21 @@
                     // 削除ボタンにイベントリスナーを追加
                     document.querySelectorAll('.delete-prize').forEach(button => {
                         button.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            prizes.splice(index, 1);
-                            updatePrizeList();
+                            const originalIndex = parseInt(this.getAttribute('data-original-index'));
+                            const deletedRarity = prizes[originalIndex].rarity; // 削除される景品のレア度を保存
+                            prizes.splice(originalIndex, 1);
                             
-                            // 景品が残っている場合は自動で確率を調整
-                            if (prizes.length > 0) {
-                                autoAdjustProbability();
+                            // 景品が残っている場合は同じレア度の景品を再調整
+                            if (prizes.filter(p => p.rarity === deletedRarity).length > 0) {
+                                rebalanceRarityProbabilities(deletedRarity);
                             } else {
-                                updateTotalProbability();
+                                updatePrizeList(); // 景品がなくなった場合はリストを更新するのみ
+                                updateTotalProbability(); // 全景品がなくなった場合も合計確率を更新
                             }
                             
+                            // ローカルストレージに保存
+                            saveToLocalStorage();
+
                             // 通知を表示
                             showNotification('景品を削除しました');
                         });
@@ -741,8 +790,8 @@
                     // 編集ボタンにイベントリスナーを追加
                     document.querySelectorAll('.edit-prize').forEach(button => {
                         button.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            openEditModal(index);
+                            const originalIndex = parseInt(this.getAttribute('data-original-index'));
+                            openEditModal(originalIndex);
                         });
                     });
                     
@@ -751,6 +800,7 @@
                 }
                 
                 updateTotalProbability();
+                saveToLocalStorage(); // ソート順が変わったことも保存
             }
             
             // 合計確率を更新
@@ -781,7 +831,7 @@
                 }
             });
             
-            // 確率を自動調整
+            // 確率を自動調整 (全景品対象)
             adjustProbabilityButton.addEventListener('click', function() {
                 if (prizes.length === 0) return;
                 
@@ -813,6 +863,8 @@
             // 編集内容を保存
             saveEditButton.addEventListener('click', function() {
                 const index = parseInt(editPrizeIndexInput.value);
+                const originalRarity = prizes[index].rarity; // 編集前のレア度を保存
+                
                 const name = editPrizeNameInput.value.trim();
                 const rarity = editRaritySelect.value;
                 const probability = parseFloat(editProbabilityInput.value);
@@ -829,16 +881,22 @@
                 
                 // 景品を更新
                 prizes[index] = {
+                    ...prizes[index], // registrationOrderを保持
                     name,
                     rarity,
                     probability
                 };
                 
-                // 景品リストを更新
-                updatePrizeList();
-                
-                // 自動で確率を調整
-                autoAdjustProbability();
+                // レア度が変更された場合は、元のレア度と新しいレア度両方を再調整
+                if (originalRarity !== rarity) {
+                    if (prizes.filter(p => p.rarity === originalRarity).length > 0) {
+                        rebalanceRarityProbabilities(originalRarity);
+                    }
+                    rebalanceRarityProbabilities(rarity);
+                } else {
+                    // 同じレア度の場合は、そのレア度のみ再調整
+                    rebalanceRarityProbabilities(rarity);
+                }
                 
                 // 通知を表示
                 showNotification('景品を更新しました');
@@ -886,6 +944,12 @@
                 const results = [];
                 const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0);
                 
+                // 合計確率が100%から大きくずれている場合は警告
+                if (Math.abs(totalProbability - 100) > 0.1) {
+                    showErrorNotification('景品合計確率が100%ではありません。自動調整してください。');
+                    // 処理を中断するかどうかは要検討。今回は警告のみで続行。
+                }
+
                 for (let i = 0; i < count; i++) {
                     // 0～totalProbabilityの乱数を生成
                     const rand = Math.random() * totalProbability;
@@ -908,6 +972,11 @@
                             rarity: selectedPrize.rarity,
                             probability: selectedPrize.probability
                         });
+                    } else {
+                        // 確率の合計が100%でない場合に選択されないことがあるので、
+                        // その場合はランダムに選択するなどのフォールバックが必要になるかもしれません。
+                        // 今回は警告を出すのみ。
+                        console.warn("No prize selected. Check probabilities.");
                     }
                 }
                 
@@ -1004,19 +1073,19 @@
                     // レア度ごとの集計
                     let rarityHTML = '<div class="mb-3 flex flex-wrap gap-1 justify-center">';
                     if (rarityCount['ultimate-rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-yellow-200 text-yellow-800 ultimate-text">LR x${rarityCount['ultimate-rare']}</span>`;
+                        rarityHTML += `<span class="rarity-badge bg-yellow-200 text-yellow-800 ultimate-text">LR x${rarityCount['ultimate-rare']}</span> `;
                     }
                     if (rarityCount['ultra-rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-pink-200 text-pink-800">UR x${rarityCount['ultra-rare']}</span>`;
+                        rarityHTML += `<span class="rarity-badge bg-pink-200 text-pink-800">UR x${rarityCount['ultra-rare']}</span> `;
                     }
                     if (rarityCount['super-rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-purple-200 text-purple-800">SR x${rarityCount['super-rare']}</span>`;
+                        rarityHTML += `<span class="rarity-badge bg-purple-200 text-purple-800">SR x${rarityCount['super-rare']}</span> `;
                     }
                     if (rarityCount['rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-blue-200 text-blue-800">R x${rarityCount['rare']}</span>`;
+                        rarityHTML += `<span class="rarity-badge bg-blue-200 text-blue-800">R x${rarityCount['rare']}</span> `;
                     }
                     if (rarityCount['common'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-gray-200 text-gray-800">N x${rarityCount['common']}</span>`;
+                        rarityHTML += `<span class="rarity-badge bg-gray-200 text-gray-800">N x${rarityCount['common']}</span> `;
                     }
                     rarityHTML += '</div>';
                     
@@ -1223,8 +1292,8 @@
                 const data = {
                     prizes: prizes,
                     history: history,
-                    pointPerDraw: pointPerDraw
-                    // 対象者は保存しない（毎回入力が必要）
+                    pointPerDraw: pointPerDraw,
+                    currentSortOrder: currentSortOrder // ソート順を保存
                 };
                 
                 localStorage.setItem('gachaSimulator', JSON.stringify(data));
@@ -1247,16 +1316,34 @@
                     if (data.pointPerDraw) {
                         pointPerDraw = data.pointPerDraw;
                     }
+
+                    // ソート順を読み込み、存在しない場合はデフォルトを設定
+                    if (data.currentSortOrder) {
+                        currentSortOrder = data.currentSortOrder;
+                    } else {
+                        currentSortOrder = 'registration-newest'; // ここでデフォルトを設定
+                    }
+                    sortOrderSelect.value = currentSortOrder; // UIに反映
                     
                     updatePrizeList();
                     updateHistory();
                     updatePointCost();
+                } else {
+                    // ローカルストレージにデータがない場合もデフォルトを設定
+                    currentSortOrder = 'registration-newest';
+                    sortOrderSelect.value = currentSortOrder; // UIに反映
                 }
             }
+
+            // ソート選択の変更イベントリスナー
+            sortOrderSelect.addEventListener('change', function() {
+                currentSortOrder = this.value;
+                updatePrizeList(); // ソート順が変わったらリストを再描画
+            });
             
             // 初期化時にローカルストレージから読み込み
             loadFromLocalStorage();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9653a91ff79196b2',t:'MTc1MzUzMDQyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
