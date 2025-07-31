@@ -260,14 +260,20 @@
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                    <h2 class="text-xl font-bold text-indigo-800 mb-3">ガチャグループ</h2>
+                    <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                        <select id="gacha-group-select" class="flex-grow sm:w-auto w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"></select>
+                        <button id="add-gacha-group" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md w-full sm:w-auto">新規追加</button>
+                        <button id="rename-gacha-group" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md w-full sm:w-auto">名前変更</button>
+                        <button id="delete-gacha-group" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md w-full sm:w-auto">削除</button>
+                    </div>
+                </div>
+
                 <div class="gacha-container p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-white">ガチャを回す</h2>
-                        <button id="open-settings" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
+                        <button id="open-settings" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-2 px-4 rounded-lg">ポイント設定</button>
                     </div>
                     
                     <div class="bg-white bg-opacity-90 rounded-lg p-4 mb-4">
@@ -414,8 +420,6 @@
             const editProbabilityInput = document.getElementById('edit-probability');
             const saveEditButton = document.getElementById('save-edit');
             const editPrizeIndexInput = document.getElementById('edit-prize-index');
-            // const adjustProbabilityContainer = document.getElementById('adjust-probability-container'); // 不要になったためコメントアウト
-            // const adjustProbabilityButton = document.getElementById('adjust-probability'); // 不要になったためコメントアウト
             const openSettingsButton = document.getElementById('open-settings');
             const settingsModal = document.getElementById('settings-modal');
             const closeSettingsModalButton = document.getElementById('close-settings-modal');
@@ -429,17 +433,26 @@
             const targetPersonInput = document.getElementById('target-person');
             const targetError = document.getElementById('target-error');
             const sortOrderSelect = document.getElementById('sort-order');
+
+            // 新しいDOM要素
+            const gachaGroupSelect = document.getElementById('gacha-group-select');
+            const addGachaGroupButton = document.getElementById('add-gacha-group');
+            const renameGachaGroupButton = document.getElementById('rename-gacha-group');
+            const deleteGachaGroupButton = document.getElementById('delete-gacha-group');
             
             // データ
+            let gachaGroups = {}; // 全てのガチャグループを格納
+            let currentGachaId = ''; // 現在選択されているガチャグループのID
+            let currentResults = null; // 現在の結果を保存
+            
+            // 以下、現在のガチャグループのデータにアクセスするためのProxy
             let prizes = [];
             let history = [];
-            let pointPerDraw = 100; // デフォルト値
-            let currentResults = null; // 現在の結果を保存
+            let pointPerDraw = 100;
+            let currentSortOrder = 'registration-newest';
             let targetPerson = ""; // 対象者
-            let currentSortOrder = 'registration-newest'; // デフォルトのソート順 (新しいものを上)
 
             // レア度ごとのデフォルト確率と色
-            // これらの確率の合計は常に100になるようにする
             const raritySettings = {
                 'common': { defaultProb: 59, bgColor: 'bg-gray-200', textColor: 'text-gray-800', label: 'N' },
                 'rare': { defaultProb: 30, bgColor: 'bg-blue-200', textColor: 'text-blue-800', label: 'R' },
@@ -450,6 +463,140 @@
             
             // レア度の優先順位（高いものが先）
             const rarityPriority = ['ultimate-rare', 'ultra-rare', 'super-rare', 'rare', 'common'];
+            
+            // --- ガチャグループ管理機能 ---
+            
+            // 新しいガチャグループを作成
+            addGachaGroupButton.addEventListener('click', function() {
+                const groupName = prompt('新しいガチャグループの名前を入力してください:', `ガチャ${Object.keys(gachaGroups).length + 1}`);
+                if (groupName && groupName.trim() !== '') {
+                    const newId = `gacha_${Date.now()}`;
+                    gachaGroups[newId] = {
+                        name: groupName.trim(),
+                        prizes: [],
+                        history: [],
+                        pointPerDraw: 100,
+                        currentSortOrder: 'registration-newest'
+                    };
+                    currentGachaId = newId;
+                    updateGachaGroupSelect();
+                    loadCurrentGachaData();
+                    saveToLocalStorage();
+                    showNotification(`「${groupName.trim()}」を作成しました！`);
+                }
+            });
+
+            // ガチャグループの名前を変更
+            renameGachaGroupButton.addEventListener('click', function() {
+                if (!currentGachaId || !gachaGroups[currentGachaId]) {
+                    showErrorNotification('変更するガチャグループがありません。');
+                    return;
+                }
+                const currentName = gachaGroups[currentGachaId].name;
+                const newName = prompt(`「${currentName}」の新しい名前を入力してください:`, currentName);
+                if (newName && newName.trim() !== '' && newName.trim() !== currentName) {
+                    gachaGroups[currentGachaId].name = newName.trim();
+                    updateGachaGroupSelect();
+                    saveToLocalStorage();
+                    showNotification(`「${currentName}」を「${newName.trim()}」に名前変更しました！`);
+                }
+            });
+
+            // ガチャグループを削除
+            deleteGachaGroupButton.addEventListener('click', function() {
+                const groupIds = Object.keys(gachaGroups);
+                if (groupIds.length === 0) {
+                    showErrorNotification('削除するガチャグループがありません。');
+                    return;
+                }
+                if (groupIds.length === 1 && groupIds[0] === currentGachaId) {
+                    showErrorNotification('最後のガチャグループは削除できません。');
+                    return;
+                }
+
+                if (confirm(`現在選択中のガチャグループ「${gachaGroups[currentGachaId].name}」を削除しますか？\nこの操作は元に戻せません。`)) {
+                    const deletedName = gachaGroups[currentGachaId].name;
+                    delete gachaGroups[currentGachaId];
+
+                    // 次に選択するグループを決定
+                    if (groupIds.length > 1) { // 削除後もグループが残る場合
+                        const remainingIds = Object.keys(gachaGroups);
+                        currentGachaId = remainingIds[0]; // 最初のグループを選択
+                    } else {
+                        // 全てのグループが削除された場合 (これは上記のガードで防がれるはずだが念のため)
+                        currentGachaId = '';
+                    }
+
+                    updateGachaGroupSelect();
+                    loadCurrentGachaData();
+                    saveToLocalStorage();
+                    showNotification(`「${deletedName}」を削除しました。`);
+                }
+            });
+
+            // ガチャグループ選択の変更
+            gachaGroupSelect.addEventListener('change', function() {
+                currentGachaId = this.value;
+                loadCurrentGachaData();
+                saveToLocalStorage();
+            });
+
+            // ガチャグループ選択ドロップダウンを更新
+            function updateGachaGroupSelect() {
+                gachaGroupSelect.innerHTML = '';
+                if (Object.keys(gachaGroups).length === 0) {
+                    gachaGroupSelect.innerHTML = '<option value="">グループなし</option>';
+                    gachaGroupSelect.disabled = true; // グループがない場合は無効化
+                    renameGachaGroupButton.disabled = true;
+                    deleteGachaGroupButton.disabled = true;
+                    return;
+                }
+                gachaGroupSelect.disabled = false;
+                renameGachaGroupButton.disabled = false;
+                deleteGachaGroupButton.disabled = false;
+
+                for (const id in gachaGroups) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = gachaGroups[id].name;
+                    gachaGroupSelect.appendChild(option);
+                }
+                gachaGroupSelect.value = currentGachaId;
+            }
+
+            // 現在のガチャグループのデータをロードしてUIに反映
+            function loadCurrentGachaData() {
+                if (!currentGachaId || !gachaGroups[currentGachaId]) {
+                    // グループがない場合の初期化
+                    prizes = [];
+                    history = [];
+                    pointPerDraw = 100;
+                    currentSortOrder = 'registration-newest';
+                    targetPersonInput.value = ''; // 対象者をクリア
+                    resultArea.innerHTML = '<p class="text-gray-500">ここに結果が表示されます</p>';
+                    shareResultButton.classList.add('hidden'); // シェアボタンを非表示
+                    updatePrizeList();
+                    updateHistory();
+                    updatePointCost();
+                    sortOrderSelect.value = currentSortOrder;
+                    return;
+                }
+
+                const currentGroup = gachaGroups[currentGachaId];
+                prizes = currentGroup.prizes;
+                history = currentGroup.history;
+                pointPerDraw = currentGroup.pointPerDraw;
+                currentSortOrder = currentGroup.currentSortOrder;
+
+                // UI要素を更新
+                updatePrizeList();
+                updateHistory();
+                updatePointCost();
+                sortOrderSelect.value = currentSortOrder; // ドロップダウンの選択を反映
+                targetPersonInput.value = ''; // 新しいガチャグループを選択した際に以前の対象者をクリア
+                resultArea.innerHTML = '<p class="text-gray-500">ここに結果が表示されます</p>'; // 結果表示エリアをリセット
+                shareResultButton.classList.add('hidden'); // シェアボタンを非表示
+            }
             
             // レア度が変更されたときにデフォルト確率を設定
             raritySelect.addEventListener('change', function() {
@@ -462,7 +609,7 @@
             editRaritySelect.addEventListener('change', function() {
                 const selectedRarity = this.value;
                 const index = parseInt(editPrizeIndexInput.value);
-                const originalRarity = prizes[index].rarity; // 編集前のレア度
+                // const originalRarity = prizes[index].rarity; // 編集前のレア度
 
                 // まず、現在の入力値から新しいレア度のデフォルト確率を取得
                 const newDefaultProb = raritySettings[selectedRarity].defaultProb;
@@ -505,6 +652,7 @@
                 }
                 
                 pointPerDraw = newPointPerDraw;
+                gachaGroups[currentGachaId].pointPerDraw = newPointPerDraw; // 現在のグループに保存
                 updatePointCost();
                 
                 // ローカルストレージに保存
@@ -581,8 +729,11 @@
                 let message = `【ガチャシミュレーター】${results.length}回引いた結果\n#なるみんTOOL\n`;
                 
                 // 対象者を追加
-                if (targetPerson) {
-                    message += `対象者：${targetPerson}\n\n`;
+                // shareResultButtonが押されたときにcurrentResultsに紐づくtargetPersonを使用
+                const shareTargetPerson = gachaGroups[currentGachaId].history.find(h => h.results === results)?.targetPerson || targetPerson;
+
+                if (shareTargetPerson) {
+                    message += `対象者：${shareTargetPerson}\n\n`;
                 } else {
                     message += `対象者：\n\n`;
                 }
@@ -610,7 +761,7 @@
             
             // 景品の確率を取得する関数
             function getPrizeProbability(name) {
-                const prize = prizes.find(p => p.name === name);
+                const prize = prizes.find(p => p.name === name); // 現在のグループのprizesから検索
                 return prize ? prize.probability : undefined;
             }
             
@@ -691,6 +842,10 @@
             
             // 景品を追加
             addPrizeButton.addEventListener('click', function() {
+                if (!currentGachaId) {
+                    showErrorNotification('ガチャグループを選択または作成してください。');
+                    return;
+                }
                 const name = prizeNameInput.value.trim();
                 const rarity = raritySelect.value;
 
@@ -722,7 +877,6 @@
             function updatePrizeList() {
                 if (prizes.length === 0) {
                     prizeList.innerHTML = '<p class="text-gray-500 text-center py-4">景品はまだ登録されていません</p>';
-                    // adjustProbabilityContainer.classList.add('hidden'); // 不要になったためコメントアウト
                 } else {
                     prizeList.innerHTML = '';
                     
@@ -813,12 +967,10 @@
                             openEditModal(originalIndex);
                         });
                     });
-                    
-                    // 確率調整ボタンは自動調整されるため不要
-                    // adjustProbabilityContainer.classList.remove('hidden'); 
                 }
                 
                 updateTotalProbability();
+                gachaGroups[currentGachaId].prizes = prizes; // 更新されたprizesを現在のグループに保存
                 saveToLocalStorage(); // ソート順が変わったことも保存
             }
             
@@ -836,10 +988,15 @@
             
             // 全景品を削除
             clearPrizesButton.addEventListener('click', function() {
+                if (!currentGachaId) {
+                    showErrorNotification('ガチャグループを選択または作成してください。');
+                    return;
+                }
                 if (prizes.length === 0) return;
                 
                 if (confirm('すべての景品を削除しますか？')) {
                     prizes = [];
+                    gachaGroups[currentGachaId].prizes = prizes; // 現在のグループのprizesをクリア
                     updatePrizeList();
                     
                     // ローカルストレージに保存
@@ -849,19 +1006,6 @@
                     showNotification('すべての景品を削除しました');
                 }
             });
-            
-            // 確率を自動調整 (全景品対象) のボタンは不要になったため削除（念のためコメントアウト）
-            // adjustProbabilityButton.addEventListener('click', function() {
-            //     if (prizes.length === 0) return;
-                
-            //     if (confirm('確率を自動的に調整して合計を100%にしますか？')) {
-            //         autoAdjustTotalProbability(); // この関数が既に各レア度グループの再調整を含む
-            //         updatePrizeList();
-                    
-            //         // 通知を表示
-            //         showNotification('確率を自動調整しました');
-            //     }
-            // });
             
             // 編集モーダルを開く
             function openEditModal(index) {
@@ -887,7 +1031,7 @@
                 
                 const name = editPrizeNameInput.value.trim();
                 const rarity = editRaritySelect.value;
-                const probability = parseFloat(editProbabilityInput.value); // ここで入力された確率は一旦無視し、rebalanceで計算し直す
+                // const probability = parseFloat(editProbabilityInput.value); // ここで入力された確率は一旦無視し、rebalanceで計算し直す
 
                 if (!name) {
                     alert('景品名を入力してください');
@@ -907,8 +1051,6 @@
                     if (prizes.filter(p => p.rarity === originalRarity).length > 0) {
                         rebalanceRarityProbabilities(originalRarity);
                     } else {
-                        // 元のレア度から景品がなくなった場合、そのレア度グループの合計確率が0になるよう調整
-                        // (自動調整で吸収されるはずだが念のため)
                         autoAdjustTotalProbability(); 
                     }
                     rebalanceRarityProbabilities(rarity);
@@ -917,6 +1059,8 @@
                     rebalanceRarityProbabilities(rarity);
                 }
                 
+                gachaGroups[currentGachaId].prizes = prizes; // 更新されたprizesを現在のグループに保存
+                saveToLocalStorage();
                 // 通知を表示
                 showNotification('景品を更新しました');
                 
@@ -936,6 +1080,10 @@
             
             // ガチャを引く
             drawButton.addEventListener('click', function() {
+                if (!currentGachaId) {
+                    showErrorNotification('ガチャグループを選択または作成してください。');
+                    return;
+                }
                 if (prizes.length === 0) {
                     alert('景品を登録してください');
                     return;
@@ -957,28 +1105,21 @@
                     return;
                 }
                 
-                // 対象者を保存
+                // 対象者を保存（今回の抽選にのみ使用）
                 targetPerson = inputTargetPerson;
                 
                 const results = [];
                 const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0);
                 
-                // 合計確率が100%から大きくずれている場合は警告 (自動調整されるため通常は発生しないはず)
                 if (Math.abs(totalProbability - 100) > 0.1) {
                     console.warn('景品合計確率が100%ではありません。自動調整してください。', totalProbability);
-                    // ここで再調整を強制するか、警告のみで続行するか選択。今回は警告のみで続行。
-                    // rebalanceRarityProbabilitiesは特定のレア度グループの調整なので、
-                    // 全体の調整が必要ならautoAdjustTotalProbability(); を呼ぶ。
-                    // 今回は追加・編集・削除時に自動的に100%になるように設計しているので、基本的にはこの警告は出ないはず。
                 }
 
                 for (let i = 0; i < count; i++) {
-                    // 0～totalProbabilityの乱数を生成
-                    const rand = Math.random() * totalProbability; // totalProbabilityは常に100に近い値になるはず
+                    const rand = Math.random() * totalProbability;
                     let cumulativeProbability = 0;
                     let selectedPrize = null;
                     
-                    // 確率に基づいて景品を選択
                     for (const prize of prizes) {
                         cumulativeProbability += prize.probability;
                         if (rand <= cumulativeProbability) {
@@ -987,56 +1128,48 @@
                         }
                     }
                     
-                    // 選択された景品を結果に追加
                     if (selectedPrize) {
                         results.push({
                             name: selectedPrize.name,
                             rarity: selectedPrize.rarity,
-                            probability: selectedPrize.probability // ガチャ実行時の景品の確率を保存
+                            probability: selectedPrize.probability
                         });
                     } else {
-                        // 景品が選択されない場合は、確率設定に問題がある可能性が高い
                         console.error("景品が選択されませんでした。確率設定を確認してください。", { rand, cumulativeProbability, prizes });
-                        // フォールバックとしてランダムに1つ選択するなどの処理を追加することも可能だが、
-                        // 基本的には確率が正しく設定されていれば発生しないはず。
                         if (prizes.length > 0) {
                             results.push({
                                 name: prizes[Math.floor(Math.random() * prizes.length)].name,
                                 rarity: prizes[Math.floor(Math.random() * prizes.length)].rarity,
-                                probability: 0 // 不明な場合は0
+                                probability: 0
                             });
                         }
                     }
                 }
                 
-                // 現在の結果を保存
                 currentResults = results;
                 
-                // 結果を表示
                 displayResults(results);
                 
-                // シェアボタンを表示
                 shareResultButton.classList.remove('hidden');
                 
-                // 履歴に追加
+                // 履歴に追加 (対象者を含める)
                 const historyItem = {
                     timestamp: new Date(),
                     count: count,
                     results: results,
                     pointCost: count * pointPerDraw,
-                    targetPerson: targetPerson
+                    targetPerson: targetPerson // 対象者を履歴に保存
                 };
                 
                 history.unshift(historyItem);
                 if (history.length > 10) history.pop(); // 最大10件まで保存
                 
+                gachaGroups[currentGachaId].history = history; // 現在のグループのhistoryを更新
                 updateHistory();
                 
-                // ローカルストレージに保存
                 saveToLocalStorage();
                 
-                // 対象者の入力欄をクリア
-                targetPersonInput.value = '';
+                targetPersonInput.value = ''; // 対象者の入力欄をクリア
             });
             
             // 結果を表示
@@ -1044,14 +1177,12 @@
                 resultArea.innerHTML = '';
                 
                 if (results.length === 1) {
-                    // 1回の場合は大きく表示
                     const result = results[0];
                     const rarityStyle = raritySettings[result.rarity];
                     
                     const resultElement = document.createElement('div');
                     let className = `result-animation ${rarityStyle.bgColor} ${rarityStyle.textColor} p-4 rounded-lg text-center`;
                     
-                    // アルティメットレアの場合は輝くエフェクトを追加
                     if (rarityStyle.isUltimate) {
                         className += ' ultimate-glow';
                     }
@@ -1074,7 +1205,6 @@
                     
                     resultArea.appendChild(resultElement);
                 } else {
-                    // 複数回の場合は集計して表示
                     const resultCounts = {};
                     const rarityCount = {
                         'common': 0,
@@ -1222,10 +1352,10 @@
                                 ${targetPersonDisplay}
                             </div>
                             <div class="flex space-x-1">
-                                <button class="replay-button bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">
+                                <button class="replay-button bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs" data-history-index="${historyIndex}">
                                     再表示
                                 </button>
-                                <button class="share-history-button bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                <button class="share-history-button bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs" data-history-index="${historyIndex}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                                     </svg>
@@ -1242,26 +1372,25 @@
                     // 再表示ボタンにイベントリスナーを追加
                     const replayButton = historyElement.querySelector('.replay-button');
                     replayButton.addEventListener('click', function() {
-                        currentResults = item.results;
-                        displayResults(item.results);
+                        const index = parseInt(this.getAttribute('data-history-index'));
+                        currentResults = history[index].results;
+                        displayResults(history[index].results);
                         shareResultButton.classList.remove('hidden');
                         
                         // 対象者も復元（入力欄には表示しない）
-                        if (item.targetPerson) {
-                            targetPerson = item.targetPerson;
-                        }
+                        targetPerson = history[index].targetPerson || "";
                     });
                     
                     // シェアボタンにイベントリスナーを追加
                     const shareHistoryButton = historyElement.querySelector('.share-history-button');
                     shareHistoryButton.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-history-index'));
+                        
                         // 対象者を一時的に設定
                         const originalTargetPerson = targetPerson;
-                        if (item.targetPerson) {
-                            targetPerson = item.targetPerson;
-                        }
+                        targetPerson = history[index].targetPerson || "";
                         
-                        const shareMessage = createShareMessage(item.results);
+                        const shareMessage = createShareMessage(history[index].results);
                         
                         // 元の対象者に戻す
                         targetPerson = originalTargetPerson;
@@ -1318,56 +1447,53 @@
             
             // ローカルストレージに保存
             function saveToLocalStorage() {
-                const data = {
-                    prizes: prizes,
-                    history: history,
-                    pointPerDraw: pointPerDraw,
-                    currentSortOrder: currentSortOrder // ソート順を保存
+                const dataToSave = {
+                    gachaGroups: gachaGroups,
+                    currentGachaId: currentGachaId
                 };
                 
-                localStorage.setItem('gachaSimulator', JSON.stringify(data));
+                localStorage.setItem('gachaSimulatorV2', JSON.stringify(dataToSave)); // バージョン2として保存キーを変更
             }
             
             // ローカルストレージから読み込み
             function loadFromLocalStorage() {
-                const savedData = localStorage.getItem('gachaSimulator');
+                const savedData = localStorage.getItem('gachaSimulatorV2'); // 新しいキーで読み込み
                 if (savedData) {
                     const data = JSON.parse(savedData);
-                    prizes = data.prizes || [];
-                    
-                    // 履歴の日時を文字列からDateオブジェクトに変換
-                    history = (data.history || []).map(item => ({
-                        ...item,
-                        timestamp: new Date(item.timestamp)
-                    }));
-                    
-                    // 消費ポイント設定を読み込み
-                    if (data.pointPerDraw) {
-                        pointPerDraw = data.pointPerDraw;
-                    }
+                    gachaGroups = data.gachaGroups || {};
+                    currentGachaId = data.currentGachaId || '';
 
-                    // ソート順を読み込み、存在しない場合はデフォルトを設定
-                    if (data.currentSortOrder) {
-                        currentSortOrder = data.currentSortOrder;
-                    } else {
-                        currentSortOrder = 'registration-newest'; // ここでデフォルトを設定
+                    // 履歴の日時を文字列からDateオブジェクトに変換
+                    for (const id in gachaGroups) {
+                        if (gachaGroups[id].history) {
+                            gachaGroups[id].history = gachaGroups[id].history.map(item => ({
+                                ...item,
+                                timestamp: new Date(item.timestamp)
+                            }));
+                        }
                     }
-                    sortOrderSelect.value = currentSortOrder; // UIに反映
-                    
-                    updatePrizeList();
-                    updateHistory();
-                    updatePointCost();
                 } else {
-                    // ローカルストレージにデータがない場合もデフォルトを設定
-                    currentSortOrder = 'registration-newest';
-                    sortOrderSelect.value = currentSortOrder; // UIに反映
+                    // データがない場合、デフォルトのガチャグループを作成
+                    const defaultId = 'gacha_default';
+                    gachaGroups[defaultId] = {
+                        name: 'My Gacha 1',
+                        prizes: [],
+                        history: [],
+                        pointPerDraw: 100,
+                        currentSortOrder: 'registration-newest'
+                    };
+                    currentGachaId = defaultId;
                 }
+                updateGachaGroupSelect();
+                loadCurrentGachaData(); // 現在のグループのデータをロード
             }
 
             // ソート選択の変更イベントリスナー
             sortOrderSelect.addEventListener('change', function() {
                 currentSortOrder = this.value;
+                gachaGroups[currentGachaId].currentSortOrder = currentSortOrder; // 現在のグループにソート順を保存
                 updatePrizeList(); // ソート順が変わったらリストを再描画
+                saveToLocalStorage(); // 変更を保存
             });
             
             // 初期化時にローカルストレージから読み込み
