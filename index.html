@@ -147,7 +147,7 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-center text-indigo-800">ガチャシミュレーター</h1>
             <div class="flex items-center space-x-2">
-                <label for="dark-mode-toggle" class="text-gray-700">闇ガチャモード</label>
+                <label for="dark-mode-toggle" id="dark-mode-text-label" class="text-gray-700">闇ガチャモード</label>
                 <input type="checkbox" id="dark-mode-toggle" class="relative w-10 h-5 transition-colors duration-200 ease-in-out bg-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 appearance-none cursor-pointer">
                 <div id="dark-mode-label" class="absolute w-4 h-4 transition-transform duration-200 ease-in-out bg-white rounded-full shadow inset-y-0 left-0"></div>
             </div>
@@ -406,6 +406,7 @@
             // DOM elements
             const body = document.body;
             const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const darkGachaModeLabel = document.getElementById('dark-mode-text-label');
             const prizeNameInput = document.getElementById('prize-name');
             const raritySelect = document.getElementById('rarity');
             const rarityContainer = document.getElementById('rarity-container');
@@ -481,6 +482,9 @@
                 isDarkGachaMode = this.checked;
                 if (isDarkGachaMode) {
                     body.classList.add('dark-gacha-mode');
+                    darkGachaModeLabel.classList.remove('text-gray-700');
+                    darkGachaModeLabel.classList.add('text-white');
+                    darkGachaModeLabel.textContent = '通常モード';
                     raritySettings = darkRaritySettings;
                     rarityPriority = ['hit', 'miss'];
                     
@@ -498,6 +502,9 @@
                     probabilityInput.max = 100;
                 } else {
                     body.classList.remove('dark-gacha-mode');
+                    darkGachaModeLabel.classList.remove('text-white');
+                    darkGachaModeLabel.classList.add('text-gray-700');
+                    darkGachaModeLabel.textContent = '闇ガチャモード';
                     raritySettings = normalRaritySettings;
                     rarityPriority = ['ultimate-rare', 'ultra-rare', 'super-rare', 'rare', 'common'];
 
@@ -1312,6 +1319,9 @@
                     darkModeToggle.checked = isDarkGachaMode;
                     if (isDarkGachaMode) {
                         body.classList.add('dark-gacha-mode');
+                        darkGachaModeLabel.classList.remove('text-gray-700');
+                        darkGachaModeLabel.classList.add('text-white');
+                        darkGachaModeLabel.textContent = '通常モード';
                         raritySettings = darkRaritySettings;
                         rarityPriority = ['hit', 'miss'];
                         rarityContainer.classList.add('hidden');
@@ -1319,6 +1329,10 @@
                         probabilityGroup.classList.remove('hidden');
                         editProbabilityGroup.classList.remove('hidden');
                     } else {
+                        body.classList.remove('dark-gacha-mode');
+                        darkGachaModeLabel.classList.remove('text-white');
+                        darkGachaModeLabel.classList.add('text-gray-700');
+                        darkGachaModeLabel.textContent = '闇ガチャモード';
                         raritySettings = normalRaritySettings;
                         rarityPriority = ['ultimate-rare', 'ultra-rare', 'super-rare', 'rare', 'common'];
                         rarityContainer.classList.remove('hidden');
