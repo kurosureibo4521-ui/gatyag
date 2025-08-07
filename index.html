@@ -11,12 +11,37 @@
         body {
             font-family: 'Noto Sans JP', sans-serif;
             background-color: #f0f4f8;
+            transition: background-color 0.5s ease;
+        }
+
+        /* 闇ガチャモード用のボディスタイル */
+        body.dark-mode {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .text-indigo-800 {
+            color: #9f7aea;
+        }
+        
+        /* 闇ガチャモード時の入力・選択ボックスの文字色を濃くする */
+        body.dark-mode select,
+        body.dark-mode input[type="text"],
+        body.dark-mode input[type="number"],
+        body.dark-mode textarea {
+            color: #1a202c;
         }
         
         .gacha-container {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             border-radius: 1rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: background 0.5s ease;
+        }
+
+        /* 闇ガチャモード用のガチャコンテナ */
+        body.dark-mode .gacha-container {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
         }
         
         .prize-card {
@@ -75,7 +100,7 @@
             }
         }
         
-        .edit-modal {
+        .edit-modal, .group-modal {
             animation: fadeIn 0.3s ease-out;
         }
         
@@ -190,6 +215,9 @@
                         <option value="ultra-rare">UR (2%)</option>
                         <option value="ultimate-rare">LR (1%)</option>
                     </select>
+                    <select id="edit-dark-rarity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 hidden">
+                        <option value="hit">当たり</option>
+                    </select>
                 </div>
                 
                 <div class="mb-4">
@@ -257,6 +285,40 @@
                 </div>
             </div>
         </div>
+
+        <div id="add-group-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden group-modal">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-indigo-800">新しいガチャグループを作成</h3>
+                    <button id="close-add-group-modal" class="text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">グループ名</label>
+                    <input type="text" id="new-group-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="グループ名を入力">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" id="enable-dark-gacha-mode" class="form-checkbox h-5 w-5 text-indigo-600">
+                        <span class="ml-2 text-gray-700">闇ガチャモードを有効にする</span>
+                    </label>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button id="cancel-add-group" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-md">
+                        キャンセル
+                    </button>
+                    <button id="create-group" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-md">
+                        作成
+                    </button>
+                </div>
+            </div>
+        </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2">
@@ -289,7 +351,7 @@
                             <span class="text-gray-700">回数:</span>
                             <div class="flex items-center">
                                 <button id="decrease-count" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-l-lg hover:bg-gray-300">-</button>
-                                <input type="number" id="gacha-count" class="w-16 text-center border-t border-b border-gray-300 py-1" value="1" min="1" max="100">
+                                <input type="number" id="gacha-count" class="w-16 text-center border-t border-b border-gray-300 py-1" value="1" min="1" max="999">
                                 <button id="increase-count" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-r-lg hover:bg-gray-300">+</button>
                             </div>
                         </div>
@@ -312,7 +374,7 @@
                         </button>
                         <button id="share-result" class="gacha-button bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg hidden">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                                <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                             </svg>
                         </button>
                     </div>
@@ -344,11 +406,15 @@
                             <option value="ultra-rare">UR (2%)</option>
                             <option value="ultimate-rare">LR (1%)</option>
                         </select>
+                        <select id="dark-rarity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 hidden">
+                            <option value="hit">当たり</option>
+                        </select>
                     </div>
                     
                     <div class="mb-4">
                         <label class="block text-gray-700 mb-2">確率 (%)</label>
-                        <input type="number" id="probability" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="確率" step="0.1" min="0.1" max="100" readonly> </div>
+                        <input type="number" id="probability" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="確率" step="0.1" min="0.1" max="100">
+                    </div>
                     
                     <div class="flex space-x-2">
                         <button id="add-prize" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md flex-grow">
@@ -366,7 +432,7 @@
                         <span class="text-sm text-gray-600">合計確率: <span id="total-probability">0</span>%</span>
                     </div>
                     
-                    <div class="mb-3 flex flex-wrap gap-2">
+                    <div id="rarity-badges-container" class="mb-3 flex flex-wrap gap-2">
                         <span class="rarity-badge bg-gray-200 text-gray-800">N</span>
                         <span class="rarity-badge bg-blue-200 text-blue-800">R</span>
                         <span class="rarity-badge bg-purple-200 text-purple-800">SR</span>
@@ -397,6 +463,7 @@
             // DOM要素
             const prizeNameInput = document.getElementById('prize-name');
             const raritySelect = document.getElementById('rarity');
+            const darkRaritySelect = document.getElementById('dark-rarity');
             const probabilityInput = document.getElementById('probability');
             const addPrizeButton = document.getElementById('add-prize');
             const clearPrizesButton = document.getElementById('clear-prizes');
@@ -417,6 +484,7 @@
             const closeEditModalButton = document.getElementById('close-edit-modal');
             const editPrizeNameInput = document.getElementById('edit-prize-name');
             const editRaritySelect = document.getElementById('edit-rarity');
+            const editDarkRaritySelect = document.getElementById('edit-dark-rarity');
             const editProbabilityInput = document.getElementById('edit-probability');
             const saveEditButton = document.getElementById('save-edit');
             const editPrizeIndexInput = document.getElementById('edit-prize-index');
@@ -433,24 +501,34 @@
             const targetPersonInput = document.getElementById('target-person');
             const targetError = document.getElementById('target-error');
             const sortOrderSelect = document.getElementById('sort-order');
-
-            // 新しいDOM要素
             const gachaGroupSelect = document.getElementById('gacha-group-select');
             const addGachaGroupButton = document.getElementById('add-gacha-group');
             const renameGachaGroupButton = document.getElementById('rename-gacha-group');
             const deleteGachaGroupButton = document.getElementById('delete-gacha-group');
+            const rarityBadgesContainer = document.getElementById('rarity-badges-container');
+            const body = document.body;
+            const gachaContainer = document.querySelector('.gacha-container');
+            
+            // 新しいガチャグループ作成モーダル関連のDOM要素
+            const addGroupModal = document.getElementById('add-group-modal');
+            const newGroupNameInput = document.getElementById('new-group-name');
+            const enableDarkGachaModeCheckbox = document.getElementById('enable-dark-gacha-mode');
+            const createGroupButton = document.getElementById('create-group');
+            const cancelAddGroupButton = document.getElementById('cancel-add-group');
+            const closeAddGroupModalButton = document.getElementById('close-add-group-modal');
             
             // データ
-            let gachaGroups = {}; // 全てのガチャグループを格納
-            let currentGachaId = ''; // 現在選択されているガチャグループのID
-            let currentResults = null; // 現在の結果を保存
+            let gachaGroups = {}; 
+            let currentGachaId = ''; 
+            let currentResults = null; 
             
             // 以下、現在のガチャグループのデータにアクセスするためのProxy
             let prizes = [];
             let history = [];
             let pointPerDraw = 100;
             let currentSortOrder = 'registration-newest';
-            let targetPerson = ""; // 対象者
+            let targetPerson = "";
+            let isDarkGachaMode = false; // 新しいフラグ
 
             // レア度ごとのデフォルト確率と色
             const raritySettings = {
@@ -458,35 +536,68 @@
                 'rare': { defaultProb: 30, bgColor: 'bg-blue-200', textColor: 'text-blue-800', label: 'R' },
                 'super-rare': { defaultProb: 8, bgColor: 'bg-purple-200', textColor: 'text-purple-800', label: 'SR' },
                 'ultra-rare': { defaultProb: 2, bgColor: 'bg-pink-200', textColor: 'text-pink-800', label: 'UR' },
-                'ultimate-rare': { defaultProb: 1, bgColor: 'bg-yellow-200', textColor: 'text-yellow-800', label: 'LR', isUltimate: true }
+                'ultimate-rare': { defaultProb: 1, bgColor: 'bg-yellow-200', textColor: 'text-yellow-800', label: 'LR', isUltimate: true },
+                'hit': { defaultProb: 0.2, bgColor: 'bg-yellow-200', textColor: 'text-yellow-800', label: '当たり', isUltimate: true },
+                'miss': { defaultProb: 99.8, bgColor: 'bg-gray-200', textColor: 'text-gray-800', label: 'ハズレ' }
             };
             
             // レア度の優先順位（高いものが先）
             const rarityPriority = ['ultimate-rare', 'ultra-rare', 'super-rare', 'rare', 'common'];
-            
+            const darkRarityPriority = ['hit', 'miss'];
+
             // --- ガチャグループ管理機能 ---
             
-            // 新しいガチャグループを作成
             addGachaGroupButton.addEventListener('click', function() {
-                const groupName = prompt('新しいガチャグループの名前を入力してください:', `ガチャ${Object.keys(gachaGroups).length + 1}`);
-                if (groupName && groupName.trim() !== '') {
-                    const newId = `gacha_${Date.now()}`;
-                    gachaGroups[newId] = {
-                        name: groupName.trim(),
-                        prizes: [],
-                        history: [],
-                        pointPerDraw: 100,
-                        currentSortOrder: 'registration-newest'
-                    };
-                    currentGachaId = newId;
-                    updateGachaGroupSelect();
-                    loadCurrentGachaData();
-                    saveToLocalStorage();
-                    showNotification(`「${groupName.trim()}」を作成しました！`);
-                }
+                newGroupNameInput.value = `ガチャ${Object.keys(gachaGroups).length + 1}`;
+                enableDarkGachaModeCheckbox.checked = false;
+                addGroupModal.classList.remove('hidden');
+            });
+            
+            closeAddGroupModalButton.addEventListener('click', function() {
+                addGroupModal.classList.add('hidden');
             });
 
-            // ガチャグループの名前を変更
+            cancelAddGroupButton.addEventListener('click', function() {
+                addGroupModal.classList.add('hidden');
+            });
+
+            createGroupButton.addEventListener('click', function() {
+                const groupName = newGroupNameInput.value.trim();
+                const enableDarkGacha = enableDarkGachaModeCheckbox.checked;
+
+                if (groupName === '') {
+                    alert('グループ名を入力してください。');
+                    return;
+                }
+
+                const newId = `gacha_${Date.now()}`;
+                gachaGroups[newId] = {
+                    name: groupName,
+                    prizes: [],
+                    history: [],
+                    pointPerDraw: 100,
+                    isDarkGachaMode: enableDarkGacha,
+                    currentSortOrder: 'registration-newest'
+                };
+                currentGachaId = newId;
+                
+                // 闇ガチャモードが有効な場合、ハズレ景品を自動で追加する
+                if (enableDarkGacha) {
+                    gachaGroups[newId].prizes.push({
+                        name: 'ハズレ',
+                        rarity: 'miss',
+                        probability: 100, // 初期値は100%
+                        registrationOrder: Date.now() - 1 // 登録順で当たりより後になるように
+                    });
+                }
+                
+                updateGachaGroupSelect();
+                loadCurrentGachaData();
+                saveToLocalStorage();
+                showNotification(`「${groupName}」を作成しました！`);
+                addGroupModal.classList.add('hidden');
+            });
+
             renameGachaGroupButton.addEventListener('click', function() {
                 if (!currentGachaId || !gachaGroups[currentGachaId]) {
                     showErrorNotification('変更するガチャグループがありません。');
@@ -502,7 +613,6 @@
                 }
             });
 
-            // ガチャグループを削除
             deleteGachaGroupButton.addEventListener('click', function() {
                 const groupIds = Object.keys(gachaGroups);
                 if (groupIds.length === 0) {
@@ -518,12 +628,10 @@
                     const deletedName = gachaGroups[currentGachaId].name;
                     delete gachaGroups[currentGachaId];
 
-                    // 次に選択するグループを決定
-                    if (groupIds.length > 1) { // 削除後もグループが残る場合
+                    if (groupIds.length > 1) { 
                         const remainingIds = Object.keys(gachaGroups);
-                        currentGachaId = remainingIds[0]; // 最初のグループを選択
+                        currentGachaId = remainingIds[0]; 
                     } else {
-                        // 全てのグループが削除された場合 (これは上記のガードで防がれるはずだが念のため)
                         currentGachaId = '';
                     }
 
@@ -534,19 +642,17 @@
                 }
             });
 
-            // ガチャグループ選択の変更
             gachaGroupSelect.addEventListener('change', function() {
                 currentGachaId = this.value;
                 loadCurrentGachaData();
                 saveToLocalStorage();
             });
 
-            // ガチャグループ選択ドロップダウンを更新
             function updateGachaGroupSelect() {
                 gachaGroupSelect.innerHTML = '';
                 if (Object.keys(gachaGroups).length === 0) {
                     gachaGroupSelect.innerHTML = '<option value="">グループなし</option>';
-                    gachaGroupSelect.disabled = true; // グループがない場合は無効化
+                    gachaGroupSelect.disabled = true; 
                     renameGachaGroupButton.disabled = true;
                     deleteGachaGroupButton.disabled = true;
                     return;
@@ -564,38 +670,85 @@
                 gachaGroupSelect.value = currentGachaId;
             }
 
-            // 現在のガチャグループのデータをロードしてUIに反映
             function loadCurrentGachaData() {
                 if (!currentGachaId || !gachaGroups[currentGachaId]) {
-                    // グループがない場合の初期化
                     prizes = [];
                     history = [];
                     pointPerDraw = 100;
                     currentSortOrder = 'registration-newest';
-                    targetPersonInput.value = ''; // 対象者をクリア
+                    isDarkGachaMode = false;
+                    targetPersonInput.value = '';
                     resultArea.innerHTML = '<p class="text-gray-500">ここに結果が表示されます</p>';
-                    shareResultButton.classList.add('hidden'); // シェアボタンを非表示
+                    shareResultButton.classList.add('hidden');
                     updatePrizeList();
                     updateHistory();
                     updatePointCost();
                     sortOrderSelect.value = currentSortOrder;
+                    toggleDarkGachaModeUI(isDarkGachaMode);
                     return;
                 }
 
                 const currentGroup = gachaGroups[currentGachaId];
-                prizes = currentGroup.prizes;
+                prizes = currentGroup.prizes; 
                 history = currentGroup.history;
                 pointPerDraw = currentGroup.pointPerDraw;
                 currentSortOrder = currentGroup.currentSortOrder;
+                isDarkGachaMode = currentGroup.isDarkGachaMode || false;
 
-                // UI要素を更新
                 updatePrizeList();
                 updateHistory();
                 updatePointCost();
-                sortOrderSelect.value = currentSortOrder; // ドロップダウンの選択を反映
-                targetPersonInput.value = ''; // 新しいガチャグループを選択した際に以前の対象者をクリア
-                resultArea.innerHTML = '<p class="text-gray-500">ここに結果が表示されます</p>'; // 結果表示エリアをリセット
-                shareResultButton.classList.add('hidden'); // シェアボタンを非表示
+                sortOrderSelect.value = currentSortOrder;
+                toggleDarkGachaModeUI(isDarkGachaMode);
+                targetPersonInput.value = '';
+                resultArea.innerHTML = '<p class="text-gray-500">ここに結果が表示されます</p>';
+                shareResultButton.classList.add('hidden');
+            }
+            
+            // 闇ガチャモードのUI切り替え
+            function toggleDarkGachaModeUI(isDark) {
+                if (isDark) {
+                    body.classList.add('dark-mode');
+                    raritySelect.classList.add('hidden');
+                    darkRaritySelect.classList.remove('hidden');
+                    probabilityInput.readOnly = false;
+                    probabilityInput.setAttribute('step', '0.1');
+                    probabilityInput.setAttribute('min', '0.1');
+                    probabilityInput.setAttribute('max', '100');
+                    probabilityInput.value = '0.2';
+                    editRaritySelect.classList.add('hidden');
+                    editDarkRaritySelect.classList.remove('hidden');
+                    editProbabilityInput.readOnly = false;
+                    editProbabilityInput.removeAttribute('step');
+                    editProbabilityInput.removeAttribute('min');
+                    editProbabilityInput.removeAttribute('max');
+                    rarityBadgesContainer.innerHTML = `
+                        <span class="rarity-badge bg-yellow-200 text-yellow-800 ultimate-text">当たり</span>
+                        <span class="rarity-badge bg-gray-200 text-gray-800">ハズレ</span>
+                    `;
+                } else {
+                    body.classList.remove('dark-mode');
+                    raritySelect.classList.remove('hidden');
+                    darkRaritySelect.classList.add('hidden');
+                    probabilityInput.readOnly = true;
+                    probabilityInput.removeAttribute('step');
+                    probabilityInput.removeAttribute('min');
+                    probabilityInput.removeAttribute('max');
+                    probabilityInput.value = raritySettings[raritySelect.value].defaultProb;
+                    editRaritySelect.classList.remove('hidden');
+                    editDarkRaritySelect.classList.add('hidden');
+                    editProbabilityInput.readOnly = false;
+                    editProbabilityInput.removeAttribute('step');
+                    editProbabilityInput.removeAttribute('min');
+                    editProbabilityInput.removeAttribute('max');
+                    rarityBadgesContainer.innerHTML = `
+                        <span class="rarity-badge bg-gray-200 text-gray-800">N</span>
+                        <span class="rarity-badge bg-blue-200 text-blue-800">R</span>
+                        <span class="rarity-badge bg-purple-200 text-purple-800">SR</span>
+                        <span class="rarity-badge bg-pink-200 text-pink-800">UR</span>
+                        <span class="rarity-badge bg-yellow-200 text-yellow-800 ultimate-text">LR</span>
+                    `;
+                }
             }
             
             // レア度が変更されたときにデフォルト確率を設定
@@ -603,47 +756,57 @@
                 const selectedRarity = this.value;
                 const defaultProb = raritySettings[selectedRarity].defaultProb;
                 probabilityInput.value = defaultProb;
+                probabilityInput.readOnly = true;
+            });
+
+            // 闇ガチャモードのレア度選択変更時
+            darkRaritySelect.addEventListener('change', function() {
+                const selectedRarity = this.value;
+                if (selectedRarity === 'hit') {
+                    probabilityInput.readOnly = false;
+                    probabilityInput.value = '0.2';
+                    probabilityInput.setAttribute('min', '0.1');
+                    probabilityInput.setAttribute('max', '100');
+                }
             });
             
             // 編集モーダルでのレア度変更時も同様に、そのレア度内の確率を均等に設定し直す
             editRaritySelect.addEventListener('change', function() {
                 const selectedRarity = this.value;
                 const index = parseInt(editPrizeIndexInput.value);
-                // const originalRarity = prizes[index].rarity; // 編集前のレア度
 
-                // まず、現在の入力値から新しいレア度のデフォルト確率を取得
                 const newDefaultProb = raritySettings[selectedRarity].defaultProb;
                 
-                // 同じレア度内の景品の数を取得 (編集中の景品も含む)
                 const numPrizesInNewRarity = prizes.filter((p, i) => i !== index && p.rarity === selectedRarity).length + 1;
                 
-                // そのレア度内の景品が1つならそのレア度のデフォルト確率、複数なら均等割り振り
                 const newProbValue = numPrizesInNewRarity > 0 ? (newDefaultProb / numPrizesInNewRarity) : newDefaultProb;
                 editProbabilityInput.value = Math.round(newProbValue * 10) / 10;
+                editProbabilityInput.readOnly = false;
             });
             
-            // 対象者の入力を監視
+            editDarkRaritySelect.addEventListener('change', function() {
+                // 闇ガチャモードでは「当たり」しか選択肢がないため、このイベントはほとんど使われない
+                editProbabilityInput.readOnly = false;
+            });
+
+            // 初期値を設定
+            probabilityInput.value = isDarkGachaMode ? raritySettings['hit'].defaultProb : raritySettings[raritySelect.value].defaultProb;
+            probabilityInput.readOnly = !isDarkGachaMode; // 通常モードは確率編集不可
+
             targetPersonInput.addEventListener('input', function() {
-                // エラー表示を消す
                 targetError.classList.add('hidden');
                 targetPersonInput.classList.remove('border-red-500');
             });
             
-            // 初期値を設定
-            probabilityInput.value = raritySettings[raritySelect.value].defaultProb;
-            
-            // 設定モーダルを開く
             openSettingsButton.addEventListener('click', function() {
                 pointPerDrawInput.value = pointPerDraw;
                 settingsModal.classList.remove('hidden');
             });
             
-            // 設定モーダルを閉じる
             closeSettingsModalButton.addEventListener('click', function() {
                 settingsModal.classList.add('hidden');
             });
             
-            // 設定を保存
             saveSettingsButton.addEventListener('click', function() {
                 const newPointPerDraw = parseInt(pointPerDrawInput.value);
                 if (isNaN(newPointPerDraw) || newPointPerDraw < 1) {
@@ -652,31 +815,25 @@
                 }
                 
                 pointPerDraw = newPointPerDraw;
-                gachaGroups[currentGachaId].pointPerDraw = newPointPerDraw; // 現在のグループに保存
+                gachaGroups[currentGachaId].pointPerDraw = newPointPerDraw; 
                 updatePointCost();
                 
-                // ローカルストレージに保存
                 saveToLocalStorage();
                 
-                // 通知を表示
                 showNotification('設定を保存しました');
                 
-                // モーダルを閉じる
                 settingsModal.classList.add('hidden');
             });
             
-            // シェアモーダルを閉じる
             closeShareModalButton.addEventListener('click', function() {
                 shareModal.classList.add('hidden');
             });
             
-            // Xでシェア
             shareToXButton.addEventListener('click', function() {
                 const text = encodeURIComponent(shareMessageTextarea.value);
                 window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
             });
             
-            // 結果をシェア
             shareResultButton.addEventListener('click', function() {
                 if (!currentResults) return;
                 
@@ -685,20 +842,12 @@
                 shareModal.classList.remove('hidden');
             });
             
-            // シェアメッセージを作成
             function createShareMessage(results) {
-                // レア度ごとの集計
-                const rarityCount = {
-                    'common': 0,
-                    'rare': 0,
-                    'super-rare': 0,
-                    'ultra-rare': 0,
-                    'ultimate-rare': 0
-                };
-                
+                const rarityCount = {};
                 const resultCounts = {};
                 
                 results.forEach(result => {
+                    if (!rarityCount[result.rarity]) rarityCount[result.rarity] = 0;
                     rarityCount[result.rarity]++;
                     
                     if (!resultCounts[result.name]) {
@@ -711,25 +860,21 @@
                     resultCounts[result.name].count++;
                 });
                 
-                // 最高レア度の景品を見つける
                 let highestRarity = 'common';
-                for (const rarity of rarityPriority) {
+                const rarityP = isDarkGachaMode ? darkRarityPriority : rarityPriority;
+                for (const rarity of rarityP) {
                     if (rarityCount[rarity] > 0) {
                         highestRarity = rarity;
                         break;
                     }
                 }
                 
-                // 最高レア度の景品リスト
                 const highestRarityPrizes = Object.entries(resultCounts)
                     .filter(([_, data]) => data.rarity === highestRarity)
                     .map(([name, data]) => `${name}(${data.count})`);
                 
-                // シェアメッセージを構築
                 let message = `【ガチャシミュレーター】${results.length}回引いた結果\n#なるみんTOOL\n`;
                 
-                // 対象者を追加
-                // shareResultButtonが押されたときにcurrentResultsに紐づくtargetPersonを使用
                 const shareTargetPerson = gachaGroups[currentGachaId].history.find(h => h.results === results)?.targetPerson || targetPerson;
 
                 if (shareTargetPerson) {
@@ -742,12 +887,11 @@
                     message += `最高レア度(${raritySettings[highestRarity].label}): ${highestRarityPrizes.join(', ')}\n\n`;
                 }
                 
-                // 獲得した景品の一覧を追加
                 message += '【獲得した景品一覧】\n';
                 
-                // レア度順にソート
                 const sortedItems = Object.entries(resultCounts).sort((a, b) => {
-                    return rarityPriority.indexOf(a[1].rarity) - rarityPriority.indexOf(b[1].rarity);
+                    const priorityList = isDarkGachaMode ? darkRarityPriority : rarityPriority;
+                    return priorityList.indexOf(a[1].rarity) - priorityList.indexOf(b[1].rarity);
                 });
                 
                 sortedItems.forEach(([name, data]) => {
@@ -759,142 +903,166 @@
                 return message;
             }
             
-            // 景品の確率を取得する関数
             function getPrizeProbability(name) {
-                const prize = prizes.find(p => p.name === name); // 現在のグループのprizesから検索
+                const prize = prizes.find(p => p.name === name);
                 return prize ? prize.probability : undefined;
             }
             
-            // 特定のレア度の景品確率を均等に再配分する関数
             function rebalanceRarityProbabilities(rarityToRebalance) {
-                const prizesOfRarity = prizes.filter(prize => prize.rarity === rarityToRebalance);
-                if (prizesOfRarity.length === 0) {
-                    // そのレア度の景品がない場合は何もしない
-                    return;
-                }
+                if (isDarkGachaMode) {
+                    const hitPrizes = prizes.filter(p => p.rarity === 'hit');
+                    const missPrizes = prizes.filter(p => p.rarity === 'miss');
+                    
+                    const totalHitProb = hitPrizes.reduce((sum, prize) => sum + prize.probability, 0);
 
-                // そのレア度のデフォルト確率を取得
-                const defaultRarityProb = raritySettings[rarityToRebalance].defaultProb;
-
-                // 各景品に均等に割り振る
-                const newProbPerPrize = defaultRarityProb / prizesOfRarity.length;
-
-                prizesOfRarity.forEach(prize => {
-                    prize.probability = Math.round(newProbPerPrize * 10) / 10; // 小数点第1位まで丸める
-                });
-                
-                // 合計がデフォルト確率になるように最後の景品を微調整
-                const currentSum = prizesOfRarity.reduce((sum, prize, index) => {
-                    if (index < prizesOfRarity.length - 1) {
-                        return sum + prize.probability;
+                    if (missPrizes.length > 0) {
+                        const newMissProb = 100 - totalHitProb;
+                        missPrizes[0].probability = Math.round(newMissProb * 10) / 10;
                     }
-                    return sum;
-                }, 0);
+                } else {
+                    const prizesOfRarity = prizes.filter(prize => prize.rarity === rarityToRebalance);
+                    if (prizesOfRarity.length === 0) {
+                        return;
+                    }
 
-                if (prizesOfRarity.length > 0) {
-                    prizesOfRarity[prizesOfRarity.length - 1].probability = Math.round((defaultRarityProb - currentSum) * 10) / 10;
+                    const defaultRarityProb = raritySettings[rarityToRebalance].defaultProb;
+                    const newProbPerPrize = defaultRarityProb / prizesOfRarity.length;
+
+                    prizesOfRarity.forEach(prize => {
+                        prize.probability = Math.round(newProbPerPrize * 10) / 10;
+                    });
+                    
+                    const currentSum = prizesOfRarity.reduce((sum, prize, index) => {
+                        if (index < prizesOfRarity.length - 1) {
+                            return sum + prize.probability;
+                        }
+                        return sum;
+                    }, 0);
+
+                    if (prizesOfRarity.length > 0) {
+                        prizesOfRarity[prizesOfRarity.length - 1].probability = Math.round((defaultRarityProb - currentSum) * 10) / 10;
+                    }
                 }
 
-                // 全レア度の合計確率を100%に再調整（最終調整）
                 autoAdjustTotalProbability();
-
                 updatePrizeList();
                 saveToLocalStorage();
             }
 
-            // 全レア度の合計確率を100%に自動調整する関数
             function autoAdjustTotalProbability() {
                 if (prizes.length === 0) return;
 
-                // 各レア度グループの合計確率を一旦計算
-                const rarityGroupTotals = {};
-                for (const rarity in raritySettings) {
-                    rarityGroupTotals[rarity] = 0;
-                }
-                prizes.forEach(prize => {
-                    rarityGroupTotals[prize.rarity] += prize.probability;
-                });
+                if (isDarkGachaMode) {
+                    const hitPrizes = prizes.filter(p => p.rarity === 'hit');
+                    const missPrizes = prizes.filter(p => p.rarity === 'miss');
 
-                let overallTotal = 0;
-                for (const rarity in rarityGroupTotals) {
-                    overallTotal += rarityGroupTotals[rarity];
-                }
-
-                // 全体の合計が100%からずれている場合に調整
-                if (Math.abs(overallTotal - 100) > 0.01) { // 誤差を考慮
-                    // 各レア度グループの確率を全体に占める割合に応じて調整
-                    const adjustmentFactor = 100 / overallTotal;
+                    if (missPrizes.length > 0) {
+                        let totalHitProb = hitPrizes.reduce((sum, p) => sum + p.probability, 0);
+                        missPrizes[0].probability = Math.max(0, 100 - totalHitProb);
+                    }
+                } else {
+                    const rarityGroupTotals = {};
+                    for (const rarity in raritySettings) {
+                        rarityGroupTotals[rarity] = 0;
+                    }
                     prizes.forEach(prize => {
-                        prize.probability = Math.round((prize.probability * adjustmentFactor) * 10) / 10;
+                        rarityGroupTotals[prize.rarity] += prize.probability;
                     });
-                }
 
-                // 最後の景品の確率を微調整して合計を正確に100%にする
-                let finalTotal = prizes.reduce((sum, prize, index) => {
-                    return sum + prize.probability;
-                }, 0);
-                
-                if (prizes.length > 0 && Math.abs(finalTotal - 100) > 0.01) {
-                    const diff = 100 - finalTotal;
-                    prizes[prizes.length - 1].probability = Math.round((prizes[prizes.length - 1].probability + diff) * 10) / 10;
+                    let overallTotal = 0;
+                    for (const rarity in rarityGroupTotals) {
+                        overallTotal += rarityGroupTotals[rarity];
+                    }
+
+                    if (Math.abs(overallTotal - 100) > 0.01) {
+                        const adjustmentFactor = 100 / overallTotal;
+                        prizes.forEach(prize => {
+                            prize.probability = Math.round((prize.probability * adjustmentFactor) * 10) / 10;
+                        });
+                    }
+
+                    let finalTotal = prizes.reduce((sum, prize, index) => {
+                        return sum + prize.probability;
+                    }, 0);
+                    
+                    if (prizes.length > 0 && Math.abs(finalTotal - 100) > 0.01) {
+                        const diff = 100 - finalTotal;
+                        prizes[prizes.length - 1].probability = Math.round((prizes[prizes.length - 1].probability + diff) * 10) / 10;
+                    }
                 }
             }
             
-            // 景品を追加
             addPrizeButton.addEventListener('click', function() {
                 if (!currentGachaId) {
                     showErrorNotification('ガチャグループを選択または作成してください。');
                     return;
                 }
+                
                 const name = prizeNameInput.value.trim();
-                const rarity = raritySelect.value;
+                const rarity = isDarkGachaMode ? darkRaritySelect.value : raritySelect.value;
+                const probability = parseFloat(probabilityInput.value);
 
                 if (!name) {
                     alert('景品名を入力してください');
                     return;
                 }
                 
-                // 景品を追加（確率は後でrebalanceRarityProbabilitiesで設定される）
-                prizes.push({
-                    name,
-                    rarity,
-                    probability: 0, // 初期確率は0にして、後で再調整
-                    registrationOrder: Date.now() // 登録順を保存 (タイムスタンプでユニークな順序を保証)
-                });
+                if(isDarkGachaMode && rarity === 'hit') {
+                    // 「ハズレ」が存在しない場合、自動的に追加
+                    if (!prizes.some(p => p.rarity === 'miss')) {
+                        prizes.push({
+                            name: 'ハズレ',
+                            rarity: 'miss',
+                            probability: 0,
+                            registrationOrder: Date.now() - 1 // 登録順で当たりより後になるように
+                        });
+                    }
+
+                    // 当たり景品を追加
+                    prizes.push({
+                        name,
+                        rarity,
+                        probability: probability,
+                        registrationOrder: Date.now()
+                    });
+
+                    rebalanceRarityProbabilities('miss');
+
+                } else {
+                    // 通常モード
+                    prizes.push({
+                        name,
+                        rarity,
+                        probability: raritySettings[rarity].defaultProb,
+                        registrationOrder: Date.now()
+                    });
+                    rebalanceRarityProbabilities(rarity);
+                }
                 
-                // 入力フィールドをリセット
                 prizeNameInput.value = '';
-                probabilityInput.value = raritySettings[raritySelect.value].defaultProb; // デフォルト確率に戻す
+                probabilityInput.value = isDarkGachaMode ? raritySettings['hit'].defaultProb : raritySettings[raritySelect.value].defaultProb;
+                darkRaritySelect.value = 'hit';
                 
-                // 同じレア度の景品を再調整し、全体の合計も調整
-                rebalanceRarityProbabilities(rarity);
-                
-                // 通知を表示
                 showNotification('景品を追加しました');
             });
             
-            // 景品リストを更新
             function updatePrizeList() {
                 if (prizes.length === 0) {
                     prizeList.innerHTML = '<p class="text-gray-500 text-center py-4">景品はまだ登録されていません</p>';
                 } else {
                     prizeList.innerHTML = '';
                     
-                    // ソート処理
-                    let sortedPrizes = [...prizes]; // 元の配列を破壊しないようにコピー
+                    let sortedPrizes = [...prizes]; 
                     if (currentSortOrder === 'rarity') {
+                        const priorityList = isDarkGachaMode ? darkRarityPriority : rarityPriority;
                         sortedPrizes.sort((a, b) => {
-                            // レア度が高いものほど前になるようにソート
-                            return rarityPriority.indexOf(a.rarity) - rarityPriority.indexOf(b.rarity);
+                            return priorityList.indexOf(a.rarity) - priorityList.indexOf(b.rarity);
                         });
                     } else if (currentSortOrder === 'registration-newest') {
-                        // 登録順 (新しいものが上)
                         sortedPrizes.sort((a, b) => b.registrationOrder - a.registrationOrder);
                     } else if (currentSortOrder === 'registration-oldest') {
-                        // 登録順 (古いものが上)
                         sortedPrizes.sort((a, b) => a.registrationOrder - b.registrationOrder);
                     }
-
 
                     sortedPrizes.forEach((prize, index) => {
                         const rarityStyle = raritySettings[prize.rarity];
@@ -902,7 +1070,6 @@
                         const prizeElement = document.createElement('div');
                         let className = `prize-card ${rarityStyle.bgColor} ${rarityStyle.textColor} p-3 rounded-lg flex justify-between items-center`;
                         
-                        // アルティメットレアの場合は輝くエフェクトを追加
                         if (rarityStyle.isUltimate) {
                             className += ' ultimate-glow';
                         }
@@ -914,53 +1081,60 @@
                             nameDisplay = `<span class="ultimate-text font-bold">${prize.name}</span>`;
                         }
                         
+                        const originalIndex = prizes.indexOf(prize); // 元の配列でのインデックスを取得
+                        
+                        // 闇ガチャモードの「ハズレ」は削除不可
+                        const isDeletable = !(isDarkGachaMode && prize.rarity === 'miss');
+                        // 闇ガチャモードの「ハズレ」は確率編集不可
+                        const isEditableProbability = !(isDarkGachaMode && prize.rarity === 'miss');
+
                         prizeElement.innerHTML = `
                             <div>
                                 <div class="font-medium">${nameDisplay}</div>
                                 <div class="text-xs">${rarityStyle.label} • ${prize.probability}%</div>
                             </div>
                             <div class="flex space-x-1">
-                                <button class="edit-prize text-indigo-500 hover:text-indigo-700" data-original-index="${prizes.indexOf(prize)}">
+                                <button class="edit-prize text-indigo-500 hover:text-indigo-700" data-original-index="${originalIndex}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                     </svg>
                                 </button>
-                                <button class="delete-prize text-red-500 hover:text-red-700" data-original-index="${prizes.indexOf(prize)}">
+                                ${isDeletable ? `
+                                <button class="delete-prize text-red-500 hover:text-red-700" data-original-index="${originalIndex}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
+                                ` : ''}
                             </div>
                         `;
                         
                         prizeList.appendChild(prizeElement);
                     });
                     
-                    // 削除ボタンにイベントリスナーを追加
                     document.querySelectorAll('.delete-prize').forEach(button => {
                         button.addEventListener('click', function() {
                             const originalIndex = parseInt(this.getAttribute('data-original-index'));
-                            const deletedRarity = prizes[originalIndex].rarity; // 削除される景品のレア度を保存
+                            const deletedRarity = prizes[originalIndex].rarity;
+                            
                             prizes.splice(originalIndex, 1);
                             
-                            // 景品が残っている場合は同じレア度の景品を再調整
-                            if (prizes.filter(p => p.rarity === deletedRarity).length > 0) {
-                                rebalanceRarityProbabilities(deletedRarity);
+                            if (isDarkGachaMode) {
+                                rebalanceRarityProbabilities('miss');
                             } else {
-                                // そのレア度の景品がなくなった場合でも全体の再調整は必要
-                                autoAdjustTotalProbability();
-                                updatePrizeList(); 
+                                if (prizes.filter(p => p.rarity === deletedRarity).length > 0) {
+                                    rebalanceRarityProbabilities(deletedRarity);
+                                } else {
+                                    autoAdjustTotalProbability();
+                                    updatePrizeList(); 
+                                }
                             }
                             
-                            // ローカルストレージに保存
                             saveToLocalStorage();
-
-                            // 通知を表示
                             showNotification('景品を削除しました');
                         });
                     });
                     
-                    // 編集ボタンにイベントリスナーを追加
                     document.querySelectorAll('.edit-prize').forEach(button => {
                         button.addEventListener('click', function() {
                             const originalIndex = parseInt(this.getAttribute('data-original-index'));
@@ -970,11 +1144,10 @@
                 }
                 
                 updateTotalProbability();
-                gachaGroups[currentGachaId].prizes = prizes; // 更新されたprizesを現在のグループに保存
-                saveToLocalStorage(); // ソート順が変わったことも保存
+                gachaGroups[currentGachaId].prizes = prizes;
+                saveToLocalStorage();
             }
             
-            // 合計確率を更新
             function updateTotalProbability() {
                 const total = prizes.reduce((sum, prize) => sum + prize.probability, 0);
                 totalProbabilitySpan.textContent = total.toFixed(1);
@@ -986,7 +1159,6 @@
                 }
             }
             
-            // 全景品を削除
             clearPrizesButton.addEventListener('click', function() {
                 if (!currentGachaId) {
                     showErrorNotification('ガチャグループを選択または作成してください。');
@@ -996,79 +1168,104 @@
                 
                 if (confirm('すべての景品を削除しますか？')) {
                     prizes = [];
-                    gachaGroups[currentGachaId].prizes = prizes; // 現在のグループのprizesをクリア
+                    gachaGroups[currentGachaId].prizes = prizes;
                     updatePrizeList();
                     
-                    // ローカルストレージに保存
                     saveToLocalStorage();
                     
-                    // 通知を表示
                     showNotification('すべての景品を削除しました');
                 }
             });
             
-            // 編集モーダルを開く
             function openEditModal(index) {
                 const prize = prizes[index];
                 
                 editPrizeNameInput.value = prize.name;
-                editRaritySelect.value = prize.rarity;
-                editProbabilityInput.value = prize.probability; // 現在の確率を表示
+                
+                if (isDarkGachaMode) {
+                    editDarkRaritySelect.classList.remove('hidden');
+                    editRaritySelect.classList.add('hidden');
+                    editDarkRaritySelect.value = prize.rarity;
+                    
+                    // 「ハズレ」は名前のみ編集可能
+                    editPrizeNameInput.readOnly = false;
+                    editProbabilityInput.readOnly = prize.rarity === 'miss';
+                    
+                    // 当たりのみ確率編集
+                    if (prize.rarity === 'hit') {
+                        editProbabilityInput.removeAttribute('step');
+                        editProbabilityInput.removeAttribute('min');
+                        editProbabilityInput.removeAttribute('max');
+                    }
+                    editProbabilityInput.value = prize.probability;
+
+                } else {
+                    editDarkRaritySelect.classList.add('hidden');
+                    editRaritySelect.classList.remove('hidden');
+                    editRaritySelect.value = prize.rarity;
+                    editPrizeNameInput.readOnly = false;
+                    editProbabilityInput.readOnly = false;
+                    editProbabilityInput.removeAttribute('min');
+                    editProbabilityInput.removeAttribute('max');
+                    editProbabilityInput.value = prize.probability;
+                }
                 editPrizeIndexInput.value = index;
                 
                 editModal.classList.remove('hidden');
             }
             
-            // 編集モーダルを閉じる
             closeEditModalButton.addEventListener('click', function() {
                 editModal.classList.add('hidden');
             });
             
-            // 編集内容を保存
             saveEditButton.addEventListener('click', function() {
                 const index = parseInt(editPrizeIndexInput.value);
-                const originalRarity = prizes[index].rarity; // 編集前のレア度を保存
+                const originalRarity = prizes[index].rarity;
                 
                 const name = editPrizeNameInput.value.trim();
-                const rarity = editRaritySelect.value;
-                // const probability = parseFloat(editProbabilityInput.value); // ここで入力された確率は一旦無視し、rebalanceで計算し直す
+                const rarity = isDarkGachaMode ? editDarkRaritySelect.value : editRaritySelect.value;
+                const probability = parseFloat(editProbabilityInput.value);
 
                 if (!name) {
                     alert('景品名を入力してください');
                     return;
                 }
-                
-                // 景品を更新（確率は後でrebalanceRarityProbabilitiesで設定される）
-                prizes[index] = {
-                    ...prizes[index], // registrationOrderを保持
-                    name,
-                    rarity,
-                    probability: 0 // 仮に0に設定し、再調整で正しい値が入るようにする
-                };
-                
-                // レア度が変更された場合は、元のレア度と新しいレア度両方を再調整
-                if (originalRarity !== rarity) {
-                    if (prizes.filter(p => p.rarity === originalRarity).length > 0) {
-                        rebalanceRarityProbabilities(originalRarity);
-                    } else {
-                        autoAdjustTotalProbability(); 
-                    }
-                    rebalanceRarityProbabilities(rarity);
-                } else {
-                    // 同じレア度の場合は、そのレア度のみ再調整
-                    rebalanceRarityProbabilities(rarity);
+
+                if (isDarkGachaMode && rarity === 'hit' && isNaN(probability)) {
+                    alert('確率を数字で入力してください。');
+                    return;
                 }
                 
-                gachaGroups[currentGachaId].prizes = prizes; // 更新されたprizesを現在のグループに保存
+                if (isDarkGachaMode && rarity === 'hit') {
+                    prizes[index] = { ...prizes[index], name, rarity, probability };
+                } else if (isDarkGachaMode && rarity === 'miss') {
+                    prizes[index] = { ...prizes[index], name, rarity, probability: prizes[index].probability };
+                } else {
+                    prizes[index] = { ...prizes[index], name, rarity, probability };
+                }
+
+                if (isDarkGachaMode) {
+                    rebalanceRarityProbabilities('miss');
+                } else {
+                    if (originalRarity !== rarity) {
+                        if (prizes.filter(p => p.rarity === originalRarity).length > 0) {
+                            rebalanceRarityProbabilities(originalRarity);
+                        } else {
+                            autoAdjustTotalProbability(); 
+                        }
+                        rebalanceRarityProbabilities(rarity);
+                    } else {
+                        rebalanceRarityProbabilities(rarity);
+                    }
+                }
+                
+                gachaGroups[currentGachaId].prizes = prizes;
                 saveToLocalStorage();
-                // 通知を表示
                 showNotification('景品を更新しました');
                 
-                // モーダルを閉じる
                 editModal.classList.add('hidden');
             });
             
-            // エラー通知を表示
             function showErrorNotification(message) {
                 errorMessage.textContent = message;
                 errorNotification.classList.remove('hidden');
@@ -1078,7 +1275,6 @@
                 }, 3000);
             }
             
-            // ガチャを引く
             drawButton.addEventListener('click', function() {
                 if (!currentGachaId) {
                     showErrorNotification('ガチャグループを選択または作成してください。');
@@ -1089,25 +1285,22 @@
                     return;
                 }
                 
-                const count = parseInt(gachaCountInput.value);
-                if (isNaN(count) || count < 1) {
-                    alert('有効な回数を入力してください');
-                    return;
-                }
-                
-                // 対象者の入力チェック
                 const inputTargetPerson = targetPersonInput.value.trim();
                 if (!inputTargetPerson) {
-                    // エラー表示
                     targetError.classList.remove('hidden');
                     targetPersonInput.classList.add('border-red-500');
                     showErrorNotification('対象者を入力してください');
                     return;
                 }
                 
-                // 対象者を保存（今回の抽選にのみ使用）
                 targetPerson = inputTargetPerson;
                 
+                const count = parseInt(gachaCountInput.value);
+                if (isNaN(count) || count < 1) {
+                    alert('有効な回数を入力してください');
+                    return;
+                }
+
                 const results = [];
                 const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0);
                 
@@ -1116,7 +1309,7 @@
                 }
 
                 for (let i = 0; i < count; i++) {
-                    const rand = Math.random() * totalProbability;
+                    const rand = Math.random() * 100; // 100%を基準に乱数を生成
                     let cumulativeProbability = 0;
                     let selectedPrize = null;
                     
@@ -1135,44 +1328,39 @@
                             probability: selectedPrize.probability
                         });
                     } else {
-                        console.error("景品が選択されませんでした。確率設定を確認してください。", { rand, cumulativeProbability, prizes });
-                        if (prizes.length > 0) {
+                        // 確率の合計が100%未満の場合、最後の景品を選択する
+                        const lastPrize = prizes[prizes.length - 1];
+                        if (lastPrize) {
                             results.push({
-                                name: prizes[Math.floor(Math.random() * prizes.length)].name,
-                                rarity: prizes[Math.floor(Math.random() * prizes.length)].rarity,
-                                probability: 0
+                                name: lastPrize.name,
+                                rarity: lastPrize.rarity,
+                                probability: lastPrize.probability
                             });
                         }
                     }
                 }
                 
                 currentResults = results;
-                
                 displayResults(results);
-                
                 shareResultButton.classList.remove('hidden');
                 
-                // 履歴に追加 (対象者を含める)
                 const historyItem = {
                     timestamp: new Date(),
                     count: count,
                     results: results,
                     pointCost: count * pointPerDraw,
-                    targetPerson: targetPerson // 対象者を履歴に保存
+                    targetPerson: targetPerson
                 };
                 
                 history.unshift(historyItem);
-                if (history.length > 10) history.pop(); // 最大10件まで保存
+                if (history.length > 10) history.pop();
                 
-                gachaGroups[currentGachaId].history = history; // 現在のグループのhistoryを更新
+                gachaGroups[currentGachaId].history = history;
                 updateHistory();
-                
                 saveToLocalStorage();
-                
-                targetPersonInput.value = ''; // 対象者の入力欄をクリア
+                targetPersonInput.value = '';
             });
             
-            // 結果を表示
             function displayResults(results) {
                 resultArea.innerHTML = '';
                 
@@ -1206,13 +1394,7 @@
                     resultArea.appendChild(resultElement);
                 } else {
                     const resultCounts = {};
-                    const rarityCount = {
-                        'common': 0,
-                        'rare': 0,
-                        'super-rare': 0,
-                        'ultra-rare': 0,
-                        'ultimate-rare': 0
-                    };
+                    const rarityCount = {};
                     
                     results.forEach(result => {
                         if (!resultCounts[result.name]) {
@@ -1223,37 +1405,33 @@
                             };
                         }
                         resultCounts[result.name].count++;
+                        if (!rarityCount[result.rarity]) rarityCount[result.rarity] = 0;
                         rarityCount[result.rarity]++;
                     });
                     
                     const resultElement = document.createElement('div');
                     resultElement.className = 'result-animation';
                     
-                    // レア度ごとの集計
                     let rarityHTML = '<div class="mb-3 flex flex-wrap gap-1 justify-center">';
-                    if (rarityCount['ultimate-rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-yellow-200 text-yellow-800 ultimate-text">LR x${rarityCount['ultimate-rare']}</span> `;
-                    }
-                    if (rarityCount['ultra-rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-pink-200 text-pink-800">UR x${rarityCount['ultra-rare']}</span> `;
-                    }
-                    if (rarityCount['super-rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-purple-200 text-purple-800">SR x${rarityCount['super-rare']}</span> `;
-                    }
-                    if (rarityCount['rare'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-blue-200 text-blue-800">R x${rarityCount['rare']}</span> `;
-                    }
-                    if (rarityCount['common'] > 0) {
-                        rarityHTML += `<span class="rarity-badge bg-gray-200 text-gray-800">N x${rarityCount['common']}</span> `;
-                    }
+                    const priorityList = isDarkGachaMode ? darkRarityPriority : rarityPriority;
+                    priorityList.forEach(rarity => {
+                         if (rarityCount[rarity] > 0) {
+                            const style = raritySettings[rarity];
+                            let className = `${style.bgColor} ${style.textColor}`;
+                            let label = style.label;
+                            if (style.isUltimate) {
+                                className += ' ultimate-text';
+                            }
+                            rarityHTML += `<span class="rarity-badge ${className}">${label} x${rarityCount[rarity]}</span> `;
+                         }
+                    });
                     rarityHTML += '</div>';
                     
-                    // 獲得した景品の一覧
                     let itemsHTML = '<div class="grid grid-cols-2 gap-2">';
                     
-                    // レア度順にソート
                     const sortedItems = Object.entries(resultCounts).sort((a, b) => {
-                        return rarityPriority.indexOf(a[1].rarity) - rarityPriority.indexOf(b[1].rarity);
+                        const priorityList = isDarkGachaMode ? darkRarityPriority : rarityPriority;
+                        return priorityList.indexOf(a[1].rarity) - priorityList.indexOf(b[1].rarity);
                     });
                     
                     sortedItems.forEach(([name, data]) => {
@@ -1290,7 +1468,6 @@
                 }
             }
             
-            // 履歴を更新
             function updateHistory() {
                 if (history.length === 0) {
                     historyArea.innerHTML = '<p class="text-gray-500 text-center py-4">履歴はまだありません</p>';
@@ -1303,45 +1480,30 @@
                     const historyElement = document.createElement('div');
                     historyElement.className = 'bg-gray-50 p-3 rounded-lg';
                     
-                    // 日時をフォーマット
                     const date = new Date(item.timestamp);
                     const formattedDate = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
                     
-                    // レア度ごとの集計
-                    const rarityCount = {
-                        'common': 0,
-                        'rare': 0,
-                        'super-rare': 0,
-                        'ultra-rare': 0,
-                        'ultimate-rare': 0
-                    };
-                    
+                    const rarityCount = {};
                     item.results.forEach(result => {
+                        if (!rarityCount[result.rarity]) rarityCount[result.rarity] = 0;
                         rarityCount[result.rarity]++;
                     });
                     
-                    // レア度バッジを作成
                     let rarityBadges = '';
-                    if (rarityCount['ultimate-rare'] > 0) {
-                        rarityBadges += `<span class="rarity-badge bg-yellow-200 text-yellow-800 ultimate-text">LR x${rarityCount['ultimate-rare']}</span> `;
-                    }
-                    if (rarityCount['ultra-rare'] > 0) {
-                        rarityBadges += `<span class="rarity-badge bg-pink-200 text-pink-800">UR x${rarityCount['ultra-rare']}</span> `;
-                    }
-                    if (rarityCount['super-rare'] > 0) {
-                        rarityBadges += `<span class="rarity-badge bg-purple-200 text-purple-800">SR x${rarityCount['super-rare']}</span> `;
-                    }
-                    if (rarityCount['rare'] > 0) {
-                        rarityBadges += `<span class="rarity-badge bg-blue-200 text-blue-800">R x${rarityCount['rare']}</span> `;
-                    }
-                    if (rarityCount['common'] > 0) {
-                        rarityBadges += `<span class="rarity-badge bg-gray-200 text-gray-800">N x${rarityCount['common']}</span> `;
-                    }
+                    const priorityList = isDarkGachaMode ? darkRarityPriority : rarityPriority;
+                    priorityList.forEach(rarity => {
+                         if (rarityCount[rarity] > 0) {
+                            const style = raritySettings[rarity];
+                            let className = `${style.bgColor} ${style.textColor}`;
+                            let label = style.label;
+                            if (style.isUltimate) {
+                                className += ' ultimate-text';
+                            }
+                            rarityBadges += `<span class="rarity-badge ${className}">${label} x${rarityCount[rarity]}</span> `;
+                         }
+                    });
                     
-                    // 消費ポイントを表示
                     const pointCost = item.pointCost || (item.count * pointPerDraw);
-                    
-                    // 対象者を表示（あれば）
                     const targetPersonDisplay = item.targetPerson ? `<div class="text-xs text-gray-600">対象者: ${item.targetPerson}</div>` : '';
                     
                     historyElement.innerHTML = `
@@ -1357,7 +1519,7 @@
                                 </button>
                                 <button class="share-history-button bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs" data-history-index="${historyIndex}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                                        <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                                     </svg>
                                 </button>
                             </div>
@@ -1369,30 +1531,24 @@
                     
                     historyArea.appendChild(historyElement);
                     
-                    // 再表示ボタンにイベントリスナーを追加
                     const replayButton = historyElement.querySelector('.replay-button');
                     replayButton.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-history-index'));
                         currentResults = history[index].results;
                         displayResults(history[index].results);
                         shareResultButton.classList.remove('hidden');
-                        
-                        // 対象者も復元（入力欄には表示しない）
                         targetPerson = history[index].targetPerson || "";
                     });
                     
-                    // シェアボタンにイベントリスナーを追加
                     const shareHistoryButton = historyElement.querySelector('.share-history-button');
                     shareHistoryButton.addEventListener('click', function() {
                         const index = parseInt(this.getAttribute('data-history-index'));
                         
-                        // 対象者を一時的に設定
                         const originalTargetPerson = targetPerson;
                         targetPerson = history[index].targetPerson || "";
                         
                         const shareMessage = createShareMessage(history[index].results);
                         
-                        // 元の対象者に戻す
                         targetPerson = originalTargetPerson;
                         
                         shareMessageTextarea.value = shareMessage;
@@ -1401,7 +1557,6 @@
                 });
             }
             
-            // ガチャ回数の増減
             decreaseCountButton.addEventListener('click', function() {
                 let count = parseInt(gachaCountInput.value);
                 if (count > 1) {
@@ -1412,7 +1567,7 @@
             
             increaseCountButton.addEventListener('click', function() {
                 let count = parseInt(gachaCountInput.value);
-                if (count < 100) {
+                if (count < 999) {
                     gachaCountInput.value = count + 1;
                     updatePointCost();
                 }
@@ -1422,20 +1577,18 @@
                 let count = parseInt(this.value);
                 if (isNaN(count) || count < 1) {
                     this.value = 1;
-                } else if (count > 100) {
-                    this.value = 100;
+                } else if (count > 999) {
+                    this.value = 999;
                 }
                 updatePointCost();
             });
             
-            // ポイントコストを更新
             function updatePointCost() {
                 const count = parseInt(gachaCountInput.value);
                 const cost = count * pointPerDraw;
                 pointCostSpan.textContent = `${cost} pt`;
             }
             
-            // 通知を表示
             function showNotification(message) {
                 notificationMessage.textContent = message;
                 notification.classList.remove('hidden');
@@ -1445,25 +1598,22 @@
                 }, 3000);
             }
             
-            // ローカルストレージに保存
             function saveToLocalStorage() {
                 const dataToSave = {
                     gachaGroups: gachaGroups,
                     currentGachaId: currentGachaId
                 };
                 
-                localStorage.setItem('gachaSimulatorV2', JSON.stringify(dataToSave)); // バージョン2として保存キーを変更
+                localStorage.setItem('gachaSimulatorV3', JSON.stringify(dataToSave)); // バージョン3として保存キーを変更
             }
             
-            // ローカルストレージから読み込み
             function loadFromLocalStorage() {
-                const savedData = localStorage.getItem('gachaSimulatorV2'); // 新しいキーで読み込み
+                const savedData = localStorage.getItem('gachaSimulatorV3');
                 if (savedData) {
                     const data = JSON.parse(savedData);
                     gachaGroups = data.gachaGroups || {};
                     currentGachaId = data.currentGachaId || '';
 
-                    // 履歴の日時を文字列からDateオブジェクトに変換
                     for (const id in gachaGroups) {
                         if (gachaGroups[id].history) {
                             gachaGroups[id].history = gachaGroups[id].history.map(item => ({
@@ -1473,30 +1623,28 @@
                         }
                     }
                 } else {
-                    // データがない場合、デフォルトのガチャグループを作成
                     const defaultId = 'gacha_default';
                     gachaGroups[defaultId] = {
                         name: 'My Gacha 1',
                         prizes: [],
                         history: [],
                         pointPerDraw: 100,
+                        isDarkGachaMode: false,
                         currentSortOrder: 'registration-newest'
                     };
                     currentGachaId = defaultId;
                 }
                 updateGachaGroupSelect();
-                loadCurrentGachaData(); // 現在のグループのデータをロード
+                loadCurrentGachaData();
             }
 
-            // ソート選択の変更イベントリスナー
             sortOrderSelect.addEventListener('change', function() {
                 currentSortOrder = this.value;
-                gachaGroups[currentGachaId].currentSortOrder = currentSortOrder; // 現在のグループにソート順を保存
-                updatePrizeList(); // ソート順が変わったらリストを再描画
-                saveToLocalStorage(); // 変更を保存
+                gachaGroups[currentGachaId].currentSortOrder = currentSortOrder;
+                updatePrizeList();
+                saveToLocalStorage();
             });
             
-            // 初期化時にローカルストレージから読み込み
             loadFromLocalStorage();
         });
     </script>
