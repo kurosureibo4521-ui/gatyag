@@ -31,6 +31,11 @@
         body.dark-mode textarea {
             color: #1a202c;
         }
+
+        /* 闇ガチャモード時の履歴の文字色を濃くする */
+        body.dark-mode #history-area .bg-gray-50 {
+            color: #1a202c;
+        }
         
         .gacha-container {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -873,7 +878,7 @@
                     .filter(([_, data]) => data.rarity === highestRarity)
                     .map(([name, data]) => `${name}(${data.count})`);
                 
-                let message = `【ガチャシミュレーター】${results.length}回引いた結果\n#なるみんTOOL\n`;
+                let message = `【なるみんガチャツール】${results.length}回引いた結果\n#なるみんTOOL\n`;
                 
                 const shareTargetPerson = gachaGroups[currentGachaId].history.find(h => h.results === results)?.targetPerson || targetPerson;
 
@@ -1604,11 +1609,11 @@
                     currentGachaId: currentGachaId
                 };
                 
-                localStorage.setItem('gachaSimulatorV3', JSON.stringify(dataToSave)); // バージョン3として保存キーを変更
+                localStorage.setItem('naruminGachaToolV1', JSON.stringify(dataToSave)); 
             }
             
             function loadFromLocalStorage() {
-                const savedData = localStorage.getItem('gachaSimulatorV3');
+                const savedData = localStorage.getItem('naruminGachaToolV1');
                 if (savedData) {
                     const data = JSON.parse(savedData);
                     gachaGroups = data.gachaGroups || {};
